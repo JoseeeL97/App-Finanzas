@@ -1,0 +1,21 @@
+{
+  "name": "finanzas-personales",
+  "version": "1.0.0",
+  "description": "Aplicación web full-stack de finanzas personales",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "seed": "node backend/scripts/seed.js",
+    "test": "node --test \"backend/test/**/*.test.js\""
+  },
+  "keywords": ["finanzas", "personales", "presupuesto"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1"
+  }
+}

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinanzApp - Demo de Finanzas Personales</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/demo.css">
+  <script src="js/vendor/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-loader" id="appLoader" role="status" aria-live="polite" aria-label="Cargando FinanzApp">
+    <div class="loader-content">
+      <div class="loader-logo">
+        <svg viewBox="0 0 48 48" width="52" height="52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect class="loader-bar bar-1" x="8" y="26" width="7" height="14" rx="2"></rect>
+          <rect class="loader-bar bar-2" x="20.5" y="17" width="7" height="23" rx="2"></rect>
+          <rect class="loader-bar bar-3" x="33" y="9" width="7" height="31" rx="2"></rect>
+        </svg>
+      </div>
+      <h1 class="loader-title">FinanzApp</h1>
+      <p class="loader-subtitle">Finanzas personales</p>
+      <div class="loader-progress"><span class="loader-progress-bar"></span></div>
+      <p class="loader-status" id="loaderStatus">Cargando tu información…</p>
+    </div>
+  </div>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">📊</span>
+          <span class="logo-text">FinanzApp</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="nav-link active" data-section="dashboard">
+          <span class="nav-icon">🏠</span> Dashboard
+        </a>
+        <a href="#transactions" class="nav-link" data-section="transactions">
+          <span class="nav-icon">💳</span> Transacciones
+        </a>
+        <a href="#categories" class="nav-link" data-section="categories">
+          <span class="nav-icon">📁</span> Categorías
+        </a>
+        <a href="#budgets" class="nav-link" data-section="budgets">
+          <span class="nav-icon">🎯</span> Presupuestos
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="balance-mini">
+          <span class="balance-mini-label">Balance general</span>
+          <span class="balance-mini-value" id="sidebarBalance">$0</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="topbar-title">
+          <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="date-display" id="dateDisplay"></span>
+          <button class="btn-icon" id="darkToggle" onclick="toggleDarkMode()" title="Cambiar tema">🌓</button>
+        </div>
+      </header>
+
+      <!-- Dashboard Section -->
+      <section id="dashboard-section" class="section active">
+        <div class="dash-hero">
+          <div class="dash-hero-text">
+            <h2 class="dash-welcome" id="welcomeText">¡Hola! 👋</h2>
+            <p class="dash-subtitle" id="dashSubtitle">Resumen de tus finanzas</p>
+          </div>
+          <div class="dash-hero-actions">
+            <button class="btn btn-quick btn-income" onclick="openQuickIncome()">+ Ingreso</button>
+            <button class="btn btn-quick btn-expense" onclick="openQuickExpense()">− Gasto</button>
+          </div>
+        </div>
+
+        <div class="month-nav">
+          <button class="month-nav-btn" onclick="shiftDashboardMonth(-1)" title="Mes anterior">‹</button>
+          <div class="month-nav-center">
+            <input type="month" id="dashboardMonth" class="month-input" onchange="applyDashboardPeriod()">
+            <button class="btn-link" id="resetMonthBtn" onclick="resetDashboardMonth()">Ir al mes actual</button>
+          </div>
+          <button class="month-nav-btn" onclick="shiftDashboardMonth(1)" title="Mes siguiente">›</button>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-income">
+            <div class="kpi-top">
+              <div class="kpi-icon">💰</div>
+              <span class="kpi-badge" id="kpiIncomeTrend">—</span>
+            </div>
+            <span class="kpi-label">Ingresos del mes</span>
+            <span class="kpi-value" id="kpiIncome">$0</span>
+            <span class="kpi-hint">Total de ingresos del período</span>
+          </div>
+          <div class="kpi-card kpi-expense">
+            <div class="kpi-top">
+              <div class="kpi-icon">💸</div>
+              <span class="kpi-badge" id="kpiExpensesTrend">—</span>
+            </div>
+            <span class="kpi-label">Gastos del mes</span>
+            <span class="kpi-value" id="kpiExpenses">$0</span>
+            <span class="kpi-hint">Total de gastos del período</span>
+          </div>
+          <div class="kpi-card kpi-savings">
+            <div class="kpi-top">
+              <div class="kpi-icon">🏦</div>
+              <span class="kpi-badge" id="kpiSavingsTrend">—</span>
+            </div>
+            <span class="kpi-label">Ahorro del mes</span>
+            <span class="kpi-value" id="kpiSavings">$0</span>
+            <span class="kpi-hint">Ingresos menos gastos</span>
+          </div>
+          <div class="kpi-card kpi-rate">
+            <div class="kpi-top">
+              <div class="kpi-icon">📈</div>
+              <span class="kpi-badge" id="kpiRateTrend">—</span>
+            </div>
+            <span class="kpi-label">Tasa de ahorro</span>
+            <span class="kpi-value" id="kpiRate">0%</span>
+            <span class="kpi-hint">% de tus ingresos que ahorras</span>
+          </div>
+        </div>
+
+        <div class="insights-strip" id="insightsStrip">
+          <p class="loading-text">Cargando análisis...</p>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Distribución de Gastos por Categoría</h3>
+              <span class="chart-hint">Haz clic en una categoría para ver sus transacciones</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Tendencia Mensual (Ingresos vs Gastos)</h3>
+              <span class="chart-hint">Últimos 6 meses</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="projection-card card">
+            <h3>📊 Proyección Próximo Mes</h3>
+            <div class="projection-content" id="projectionContent">
+              <p class="loading-text">Cargando proyección...</p>
+            </div>
+          </div>
+          <div class="alerts-card card">
+            <div class="card-title-row">
+              <h3>🔔 Alertas</h3>
+              <span class="badge badge-danger" id="alertsCount" hidden>0</span>
+            </div>
+            <div class="alerts-list" id="alertsList">
+              <p class="loading-text">Cargando alertas...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card recent-transactions-card">
+          <div class="card-title-row">
+            <h3>🗂️ Últimas Transacciones</h3>
+            <button class="btn btn-secondary btn-sm" onclick="goToTransactions()">Ver todas →</button>
+          </div>
+          <div id="recentTransactions" class="recent-tx-list">
+            <p class="loading-text">Cargando...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Transactions Section -->
+      <section id="transactions-section" class="section">
+        <div class="filter-tabs">
+          <button class="ftab active" data-tx-filter="" onclick="setTxTab(this)">Todas</button>
+          <button class="ftab" data-tx-filter="income" onclick="setTxTab(this)">📈 Ingresos</button>
+          <button class="ftab" data-tx-filter="expense" onclick="setTxTab(this)">📉 Gastos</button>
+        </div>
+
+        <div class="summary-strip" id="txSummaryStrip">
+          <div class="summary-chip">
+            <span class="summary-label">Ingresos</span>
+            <span class="summary-value summary-income" id="txSumIncome">$0</span>
+          </div>
+          <div class="summary-chip">
+            <span class="summary-label">Gastos</span>
+            <span class="summary-value summary-expense" id="txSumExpense">$0</span>
+          </div>
+          <div class="summary-chip">
+            <span class="summary-label">Balance</span>
+            <span class="summary-value" id="txSumBalance">$0</span>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <select id="filterCategory" class="filter-input">
+            <option value="">Todas las categorías</option>
+          </select>
+          <input type="date" id="filterDateFrom" class="filter-input">
+          <input type="date" id="filterDateTo" class="filter-input">
+          <input type="text" id="filterSearch" class="filter-input" placeholder="Buscar descripción...">
+          <button class="btn btn-secondary" onclick="exportTransactionsCsv()">⬇️ Exportar</button>
+          <button class="btn btn-primary" onclick="openTransactionModal()">+ Nueva</button>
+        </div>
+
+        <div class="card">
+          <div class="table-container">
+            <table class="data-table" id="transactionsTable">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Categoría</th>
+                  <th>Tipo</th>
+                  <th>Monto</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsTableBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="txPagination"></span>
+            <span class="pagination-hint">💡 Haz clic en ✏️ para editar en línea</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Categories Section -->
+      <section id="categories-section" class="section">
+        <div class="section-header">
+          <div class="section-tabs">
+            <button class="tab-btn active" data-filter="" onclick="filterCategoryType(this, '')">Todas</button>
+            <button class="tab-btn" data-filter="income" onclick="filterCategoryType(this, 'income')">Ingresos</button>
+            <button class="tab-btn" data-filter="expense" onclick="filterCategoryType(this, 'expense')">Gastos</button>
+          </div>
+          <button class="btn btn-primary" onclick="openCategoryModal()">+ Nueva Categoría</button>
+        </div>
+        <div class="categories-grid" id="categoriesGrid">
+        </div>
+      </section>
+
+      <!-- Budgets Section -->
+      <section id="budgets-section" class="section">
+        <div class="section-header">
+          <div class="filters-bar">
+            <input type="month" id="budgetMonth" class="filter-input" onchange="loadBudgets()">
+          </div>
+          <button class="btn btn-primary" onclick="openBudgetModal()">+ Nuevo Presupuesto</button>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Categoría</th>
+                  <th>Presupuesto</th>
+                  <th>Gastado</th>
+                  <th>Restante</th>
+                  <th>Progreso</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="budgetsTableBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="budgetsPagination"></span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Floating action button -->
+  <button class="fab" onclick="openTransactionModal()" title="Nueva transacción">+</button>
+
+  <!-- Transaction Modal -->
+  <div class="modal-overlay" id="transactionModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="txModalTitle">Nueva Transacción</h2>
+        <button class="modal-close" onclick="closeTransactionModal()">&times;</button>
+      </div>
+      <form id="transactionForm" onsubmit="handleTransactionSubmit(event)">
+        <input type="hidden" id="txId">
+        <div class="form-group">
+          <label>¿Qué tipo de movimiento es?</label>
+          <div class="type-selector">
+            <button type="button" class="type-option expense active" data-type="expense" onclick="setTxFormType(this)">
+              <span class="type-icon">💸</span> Gasto
+            </button>
+            <button type="button" class="type-option income" data-type="income" onclick="setTxFormType(this)">
+              <span class="type-icon">💰</span> Ingreso
+            </button>
+          </div>
+          <input type="hidden" id="txType" value="expense">
+        </div>
+        <div class="form-group">
+          <label for="txAmount">Monto</label>
+          <input type="number" id="txAmount" step="100" min="1" required placeholder="Ej: 50.000" autofocus>
+        </div>
+        <div class="form-group">
+          <label for="txDescription">Descripción</label>
+          <input type="text" id="txDescription" required placeholder="Ej: Almuerzo en restaurante" maxlength="200">
+        </div>
+        <div class="form-group">
+          <label for="txCategory">Categoría</label>
+          <select id="txCategory" required></select>
+        </div>
+        <div class="form-group">
+          <label for="txDate">Fecha</label>
+          <input type="date" id="txDate" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeTransactionModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="txSubmitBtn">💾 Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="catModalTitle">Nueva Categoría</h2>
+        <button class="modal-close" onclick="closeCategoryModal()">&times;</button>
+      </div>
+      <form id="categoryForm" onsubmit="handleCategorySubmit(event)">
+        <input type="hidden" id="catId">
+        <div class="form-group">
+          <label>¿Qué tipo de categoría es?</label>
+          <div class="type-selector">
+            <button type="button" class="type-option expense active" data-type="expense" onclick="setCatFormType(this)">
+              <span class="type-icon">💸</span> Gasto
+            </button>
+            <button type="button" class="type-option income" data-type="income" onclick="setCatFormType(this)">
+              <span class="type-icon">💰</span> Ingreso
+            </button>
+          </div>
+          <input type="hidden" id="catType" value="expense">
+        </div>
+        <div class="form-group">
+          <label for="catName">Nombre</label>
+          <input type="text" id="catName" required placeholder="Ej: Viajes" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label>Icono</label>
+          <div class="icon-picker" id="iconPicker"></div>
+          <input type="hidden" id="catIcon" value="📁">
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-picker" id="colorPicker"></div>
+          <input type="hidden" id="catColor" value="#6366f1">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="catSubmitBtn">💾 Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Budget Modal -->
+  <div class="modal-overlay" id="budgetModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="budgetModalTitle">Nuevo Presupuesto</h2>
+        <button class="modal-close" onclick="closeBudgetModal()">&times;</button>
+      </div>
+      <form id="budgetForm" onsubmit="handleBudgetSubmit(event)">
+        <input type="hidden" id="budgetId">
+        <div class="form-group">
+          <label for="budgetCategory">Categoría</label>
+          <select id="budgetCategory" required></select>
+        </div>
+        <div class="form-group">
+          <label for="budgetAmount">Presupuesto mensual</label>
+          <input type="number" id="budgetAmount" step="1000" min="1" required placeholder="Ej: 500.000">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeBudgetModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="budgetSubmitBtn">💾 Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="modal-overlay" id="confirmDialog">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>⚠️ Confirmar</h2>
+        <button class="modal-close" onclick="closeConfirm()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage"></p>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeConfirm()">Cancelar</button>
+        <button class="btn btn-danger" id="confirmBtn" onclick="confirmAction()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <button class="demo-badge" type="button" title="Reiniciar los datos de ejemplo"
+    onclick="if (confirm('¿Reiniciar los datos de la demo? Se perderán tus cambios.')) { window.FinanzDemo.reset(); location.reload(); }">
+    <span class="demo-dot"></span> Demo sin servidor · datos en tu navegador · Reiniciar
+  </button>
+
+  <script src="js/mock-api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/transactions.js"></script>
+  <script src="js/categories.js"></script>
+  <script src="js/budgets.js"></script>
+</body>
+</html>
