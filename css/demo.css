@@ -1,0 +1,49 @@
+/* Modo sin servidor (GitHub Pages / archivo local): badge para reiniciar los datos. */
+
+.demo-badge {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 160;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+}
+
+.demo-badge.show {
+  display: inline-flex;
+}
+
+.demo-badge:hover {
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.demo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+
+@media (max-width: 768px) {
+  .demo-badge {
+    left: 12px;
+    right: 12px;
+    bottom: 84px;
+    justify-content: center;
+    font-size: 11px;
+  }
+}
